@@ -1,0 +1,144 @@
+<form>
+  <label>Responder</label>
+  <description>Displays responder information</description>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>1420088400</earliest>
+        <latest>1451624400</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Captured Credentials</title>
+      <single>
+        <search>
+          <query>index=pentest sourcetype="responder"|dedup username|stats count as Total</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of Non Unique Passwords</title>
+      <single>
+        <search>
+          <query>index=pentest sourcetype="responder" hashType="*"|stats count by hash| where count &gt; 1| stats count as Total</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Poisoned Auth Types</title>
+      <chart>
+        <search>
+          <query>index=pentest sourcetype=responder|stats count by poisonType|rename poisonType to Type|rename count to Count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Poisoned Service Type</title>
+      <chart>
+        <search>
+          <query>index=pentest sourcetype=responder|stats count by service|rename service to Service|rename count to Count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Poisoned Clients</title>
+      <table>
+        <search>
+          <query>index=pentest sourcetype=responder|stats count by ip|sort count desc|rename ip to "Poisoned Clients"|rename count to Count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Captured Hash Types</title>
+      <chart>
+        <search>
+          <query>index=pentest sourcetype="responder"|stats count by hashType</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Captured Domains</title>
+      <chart>
+        <search>
+          <query>index=pentest sourcetype="responder"|stats count by domain|rename domain to Domain|rename count to Count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Captured Usernames</title>
+      <table>
+        <search>
+          <query>index=pentest sourcetype="responder"|rename username to Username|table Username|dedup Username</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="time" token="hashtype_time" searchWhenChanged="true">
+        <label></label>
+        <default>
+          <earliest></earliest>
+          <latest></latest>
+        </default>
+      </input>
+      <input type="dropdown" token="hashtype_tok" searchWhenChanged="true">
+        <label>Hash Type</label>
+        <choice value="*">*</choice>
+        <default>*</default>
+        <prefix>hashType="</prefix>
+        <suffix>"</suffix>
+        <initialValue>*</initialValue>
+        <fieldForLabel>hashType</fieldForLabel>
+        <fieldForValue>hashType</fieldForValue>
+        <search>
+          <query>index=pentest sourcetype=responder|stats count by hashType</query>
+        </search>
+      </input>
+      <table>
+        <search>
+          <query>index=pentest sourcetype=responder $hashtype_tok$|rename hash to "Password Hash"|table "Password Hash"</query>
+          <earliest>$hashtype_time.earliest$</earliest>
+          <latest>$hashtype_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

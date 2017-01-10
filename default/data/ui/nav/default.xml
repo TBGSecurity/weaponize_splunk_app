@@ -1,0 +1,6 @@
+<nav search_view="search" color="#f0070f">
+	<view name="search" default='true' />
+	<view name="wifi_pineapple" />
+	<view name="responder" />
+  	<view name="dashboards" />
+</nav>

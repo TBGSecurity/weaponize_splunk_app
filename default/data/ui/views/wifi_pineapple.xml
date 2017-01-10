@@ -1,0 +1,63 @@
+<form>
+  <label>Wifi Pineapple</label>
+  <description>Display logs from the Wifi Pineapple</description>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>List of Current SSIDs Found</title>
+      <table>
+        <search>
+          <query>index="pentest" sourcetype="pineap" requestType="Probe Request"|table ssid|dedup ssid|rename ssid to SSID</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <title>Associated Clients</title>
+      <table>
+        <search>
+          <query>index="pentest" sourcetype="pineap" requestType="association" |eval temp=split(mac,":")|eval macOui=mvindex(temp,0).":".mvindex(temp,1).":".mvindex(temp,2) |lookup oui macOui |table mac company |dedup mac |rename mac to "Client MACs"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Associations by SSID</title>
+      <chart>
+        <search>
+          <query>index=pentest requestType="Association"| timechart count(mac) by ssid</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Probe Requests by SSID</title>
+      <chart>
+        <search>
+          <query>index=pentest requestType="Probe Request"| timechart count(mac) by ssid</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>1m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.chart">area</option>
+      </chart>
+    </panel>
+  </row>
+</form>
